@@ -55,7 +55,7 @@ def render_login():
     <style>
     /* Background */
     html, body, [data-testid="stAppViewContainer"], .main, .block-container {{
-        background: #165B33 !important;
+        background: #0D47A1 !important;
     }}
     header, footer {{display: none !important;}}
 
