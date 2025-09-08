@@ -1,87 +1,63 @@
-/* =========================
-   Streamlit Dashboard CSS
-   Consolidated & mobile-friendly
-   ========================= */
+/* static/style.css - Force 2 columns down to 340px, then 1 column for smaller screens */
+:root {
+  --tile-gap: 12px;
+}
 
-/* Base reset for Streamlit containers */
+/* ensure container uses full width */
 .block-container {
   max-width: 100% !important;
   padding-left: 1rem !important;
   padding-right: 1rem !important;
-  box-sizing: border-box;
+  box-sizing: border-box !important;
 }
 
-/* Dashboard grid: try to maintain 2 columns on phones, revert to 1 column on tiny screens */
-.dashboard-grid {
+/* dashboard grid: 2 columns on phones, 4 on large desktops */
+.dashboard-grid,
+div.dashboard-grid, /* some builds may have plain div */
+section.dashboard-grid {
   display: grid !important;
-  gap: 12px !important;
+  gap: var(--tile-gap) !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   align-items: stretch !important;
 }
 
-/* Allow single column only for very small devices (narrow phones) */
-@media (max-width: 360px) {
-  .dashboard-grid {
+/* tiny phones: switch to 1 column */
+@media (max-width: 340px) {
+  .dashboard-grid,
+  div.dashboard-grid,
+  section.dashboard-grid {
     grid-template-columns: 1fr !important;
   }
 }
 
-/* Reduce minimum widths for children (helps WebView & injected styles) */
+/* fallback: if Streamlit created a grid with auto-fit/minmax(250px), override it */
+*[style*="grid-template-columns: repeat(auto-fit"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+/* force column children to not set large min-widths */
 [data-testid^="stColumn"] > *,
-[data-testid="stHorizontalBlock"] > * {
+[data-testid="stHorizontalBlock"] > *,
+.rmp-card, .stBlock {
   min-width: 0 !important;
+  max-width: 100% !important;
   box-sizing: border-box !important;
 }
 
-/* Card / tile styling */
+/* tile/card styling */
 .rmp-card {
   border-radius: 12px !important;
   border: 1px solid rgba(0,0,0,0.08) !important;
   background: #fff !important;
-  padding: 14px !important;
+  padding: 12px !important;
+  min-height: 120px !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
   align-items: center !important;
-  min-height: 120px !important;
 }
 
-/* Metric numbers and labels inside tiles */
-.rmp-card .metric {
-  font-size: 1.6rem !important;
-  margin-top: 6px !important;
-  color: #222 !important;
-}
-
-/* Keep buttons / interactive items accessible on small screens */
-button, a, input {
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Tablet and up: slightly bigger tiles */
-@media (min-width: 768px) {
-  .dashboard-grid {
-    gap: 16px !important;
-    grid-template-columns: repeat(2, minmax(200px, 1fr)) !important;
-  }
-  .rmp-card { min-height: 140px !important; }
-}
-
-/* Desktop (optional more columns) */
-@media (min-width: 1200px) {
-  .dashboard-grid {
-    grid-template-columns: repeat(4, minmax(180px, 1fr)) !important;
-  }
-}
-
-/* Small helper when some WebView injections add large min-widths */
-.android-enforced-child, .android-enforced-child * {
-  min-width: 0 !important;
-  max-width: 100% !important;
-}
-
-/* Avoid horizontal overflow */
+/* avoid horizontal scrolling */
 html, body, .block-container {
   overflow-x: hidden !important;
 }
