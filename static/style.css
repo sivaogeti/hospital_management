@@ -1,15 +1,23 @@
-/* static/style.css - Force 2 columns down to 340px, fallback to 1 column below that */
-:root { --tile-gap: 12px; }
+/* static/style.css
+   Consolidated: keep 2x2 grid down to ~300px, then fallback to 1 column.
+   Also add portrait-friendly font sizing and compact tile styling.
+*/
+
+:root {
+  --tile-gap: 10px;
+  --tile-min-height: 92px;
+  --base-font-size: 15px;
+}
 
 /* ensure Streamlit container uses full width */
 .block-container {
   max-width: 100% !important;
-  padding-left: 1rem !important;
-  padding-right: 1rem !important;
+  padding-left: 0.8rem !important;
+  padding-right: 0.8rem !important;
   box-sizing: border-box !important;
 }
 
-/* grid selectors (strong) */
+/* Strong grid selectors (cover common Streamlit DOM variants) */
 .dashboard-grid,
 div.dashboard-grid,
 section.dashboard-grid,
@@ -20,8 +28,8 @@ main .dashboard-grid {
   align-items: stretch !important;
 }
 
-/* extremely narrow screens: single column */
-@media (max-width: 340px) {
+/* Extremely narrow screens: single column */
+@media (max-width: 300px) {
   .dashboard-grid,
   div.dashboard-grid,
   section.dashboard-grid,
@@ -30,12 +38,12 @@ main .dashboard-grid {
   }
 }
 
-/* override Streamlit's auto-fit/minmax default if present */
+/* Fallback: override Streamlit auto-fit/minmax if present */
 *[style*="grid-template-columns: repeat(auto-fit"] {
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
 }
 
-/* prevent child elements from forcing large min-widths */
+/* Prevent child elements from forcing large min-widths */
 [data-testid^="stColumn"] > *,
 [data-testid="stHorizontalBlock"] > *,
 .rmp-card, .stBlock, .st-b {
@@ -44,17 +52,45 @@ main .dashboard-grid {
   box-sizing: border-box !important;
 }
 
-/* tile/cell style */
+/* Force consistent text scaling and smaller base font so portrait fits */
+html, body {
+  -webkit-text-size-adjust: 100% !important;
+  -ms-text-size-adjust: 100% !important;
+  font-size: var(--base-font-size) !important;
+  line-height: 1.18 !important;
+}
+
+/* Reduce big headings that can push layout */
+h1, h2, h3, h4, .stHeader, .css-1d391kg {
+  font-size: 1.05rem !important;
+  margin: 0.2rem 0 !important;
+}
+
+/* Compact card/tile sizing suitable for portrait */
 .rmp-card {
-  border-radius: 12px !important;
+  border-radius: 10px !important;
   border: 1px solid rgba(0,0,0,0.08) !important;
   background: #fff !important;
-  padding: 12px !important;
-  min-height: 120px !important;
+  padding: 10px !important;
+  min-height: var(--tile-min-height) !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
   align-items: center !important;
+}
+
+/* metric style inside tiles */
+.rmp-card .metric {
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  margin-top: 6px !important;
+  color: #222 !important;
+}
+
+/* reduce button size inside tiles */
+.rmp-card .stButton > button {
+  min-width: 100px !important;
+  padding: 8px 12px !important;
 }
 
 /* avoid horizontal scrolling */
