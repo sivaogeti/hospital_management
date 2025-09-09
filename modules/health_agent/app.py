@@ -123,23 +123,20 @@ import streamlit as st
 from pathlib import Path
 
 def local_css(path: str):
-    """Inject local CSS into the Streamlit app"""
     p = Path(path)
     if p.exists():
         css = p.read_text(encoding="utf-8")
         st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
     else:
-        # fallback if file not found
+        # fallback inline override
         st.markdown(
             """
             <style>
             .dashboard-grid { grid-template-columns: repeat(2, 1fr) !important; }
-            @media (max-width:340px) {
-                .dashboard-grid { grid-template-columns: 1fr !important; }
-            }
+            @media (max-width:300px) { .dashboard-grid { grid-template-columns: 1fr !important; } }
             </style>
             """,
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
 
 # call this early in your app
@@ -962,6 +959,31 @@ def _bottom_nav():
 
 def render_health_agent_dashboard(user):
     from pathlib import Path
+    
+    # Small JS fallback to reapply a 2-column grid and reduce child min-widths.
+    import streamlit.components.v1 as components
+    components.html("""
+    <script>
+    (function(){
+      var enforce = function(){
+        var g = document.querySelector('.dashboard-grid') || document.querySelector('[data-testid^="stHorizontalBlock"]');
+        if (!g) return;
+        if (window.innerWidth >= 300) {
+          g.style.gridTemplateColumns = 'repeat(2, 1fr)';
+        } else {
+          g.style.gridTemplateColumns = '1fr';
+        }
+        g.querySelectorAll('*').forEach(function(c){
+          try { c.style.minWidth='0'; c.style.maxWidth='100%'; c.style.boxSizing='border-box'; } catch(e){}
+        });
+        console.log('DEBUG: grid fix applied, w=' + window.innerWidth + ', dpr=' + window.devicePixelRatio);
+      };
+      setTimeout(enforce, 500);
+      window.addEventListener('resize', enforce);
+    })();
+    </script>
+    """, height=1)
+
 
     def _find_logo_file():
         candidates = [
