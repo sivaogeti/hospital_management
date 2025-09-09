@@ -1,4 +1,8 @@
-/* static/style.css - Force 2 columns down to 340px, then 1 column for smaller screens */
+/* =========================
+   static/style.css
+   Dashboard grid override
+   ========================= */
+
 :root {
   --tile-gap: 12px;
 }
@@ -13,7 +17,7 @@
 
 /* dashboard grid: 2 columns on phones, 4 on large desktops */
 .dashboard-grid,
-div.dashboard-grid, /* some builds may have plain div */
+div.dashboard-grid,
 section.dashboard-grid {
   display: grid !important;
   gap: var(--tile-gap) !important;
@@ -30,12 +34,12 @@ section.dashboard-grid {
   }
 }
 
-/* fallback: if Streamlit created a grid with auto-fit/minmax(250px), override it */
+/* fallback: override Streamlit auto-fit grid */
 *[style*="grid-template-columns: repeat(auto-fit"] {
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
 }
 
-/* force column children to not set large min-widths */
+/* force children not to set large min-widths */
 [data-testid^="stColumn"] > *,
 [data-testid="stHorizontalBlock"] > *,
 .rmp-card, .stBlock {
@@ -44,7 +48,7 @@ section.dashboard-grid {
   box-sizing: border-box !important;
 }
 
-/* tile/card styling */
+/* card/tile styling */
 .rmp-card {
   border-radius: 12px !important;
   border: 1px solid rgba(0,0,0,0.08) !important;
@@ -55,6 +59,13 @@ section.dashboard-grid {
   flex-direction: column !important;
   justify-content: center !important;
   align-items: center !important;
+}
+
+/* metric text inside cards */
+.rmp-card .metric {
+  font-size: 1.6rem !important;
+  margin-top: 6px !important;
+  color: #222 !important;
 }
 
 /* avoid horizontal scrolling */
