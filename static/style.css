@@ -1,99 +1,316 @@
-/* static/style.css
-   Consolidated: keep 2x2 grid down to ~300px, then fallback to 1 column.
-   Also add portrait-friendly font sizing and compact tile styling.
-*/
+/* =========================
+   FINAL style.css (Applied)
+   High-contrast, robust overrides for KPI cards, buttons and form text.
+   Place this file in static/style.css (or style.css) and restart Streamlit.
+   ========================= */
 
-:root {
-  --tile-gap: 10px;
-  --tile-min-height: 92px;
-  --base-font-size: 15px;
+/* Layout helpers */
+.block-container { max-width: 1200px; padding-left: 1rem; padding-right: 1rem; }
+.dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 18px; width:100% !important; margin-bottom:16px; }
+
+/* KPI card structure */
+.rmp-card.kpi-card { border-radius:12px; padding:10px 14px; min-height:84px; display:flex; flex-direction:column; justify-content:center; align-items:flex-start; transition: transform .14s ease, box-shadow .14s ease; }
+.rmp-card.kpi-card .kpi-title { font-weight:700; font-size:14px; line-height:1.15; margin-bottom:6px; }
+.rmp-card.kpi-card .kpi-value { font-weight:800; font-size:1.35rem; line-height:1.1; }
+
+/* Minimal safe form input baseline */
+input, textarea, select { opacity: 1 !important; filter: none !important; color: inherit !important; -webkit-text-fill-color: inherit !important; }
+
+/* -------------------- FINAL SURGICAL OVERRIDES -------------------- */
+/* Place at the end of the file so it wins over injected rules */
+
+/* KPI cards: dark background + white text for strong contrast */
+div[class*="st-emotion-cache"] .rmp-card.kpi-card,
+.stApp .rmp-card.kpi-card {
+  background: rgba(12,22,55,0.96) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  filter: none !important;
+  border: 1px solid rgba(255,255,255,0.04) !important;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.35) !important;
 }
 
-/* ensure Streamlit container uses full width */
-.block-container {
-  max-width: 100% !important;
-  padding-left: 0.8rem !important;
-  padding-right: 0.8rem !important;
-  box-sizing: border-box !important;
+/* Force KPI title and value to be strong and readable */
+div[class*="st-emotion-cache"] .rmp-card.kpi-card .kpi-title,
+.stApp .rmp-card.kpi-card .kpi-title {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  font-size: 16px !important;
+  opacity: 1 !important;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.3) !important;
+}
+div[class*="st-emotion-cache"] .rmp-card.kpi-card .kpi-value,
+.stApp .rmp-card.kpi-card .kpi-value {
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  font-size: 20px !important;
+  opacity: 1 !important;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.25) !important;
 }
 
-/* Strong grid selectors (cover common Streamlit DOM variants) */
-.dashboard-grid,
-div.dashboard-grid,
-section.dashboard-grid,
-main .dashboard-grid {
-  display: grid !important;
-  gap: var(--tile-gap) !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  align-items: stretch !important;
-}
-
-/* Extremely narrow screens: single column */
-@media (max-width: 300px) {
-  .dashboard-grid,
-  div.dashboard-grid,
-  section.dashboard-grid,
-  main .dashboard-grid {
-    grid-template-columns: 1fr !important;
-  }
-}
-
-/* Fallback: override Streamlit auto-fit/minmax if present */
-*[style*="grid-template-columns: repeat(auto-fit"] {
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-}
-
-/* Prevent child elements from forcing large min-widths */
-[data-testid^="stColumn"] > *,
-[data-testid="stHorizontalBlock"] > *,
-.rmp-card, .stBlock, .st-b {
-  min-width: 0 !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-/* Force consistent text scaling and smaller base font so portrait fits */
-html, body {
-  -webkit-text-size-adjust: 100% !important;
-  -ms-text-size-adjust: 100% !important;
-  font-size: var(--base-font-size) !important;
-  line-height: 1.18 !important;
-}
-
-/* Reduce big headings that can push layout */
-h1, h2, h3, h4, .stHeader, .css-1d391kg {
-  font-size: 1.05rem !important;
-  margin: 0.2rem 0 !important;
-}
-
-/* Compact card/tile sizing suitable for portrait */
-.rmp-card {
-  border-radius: 10px !important;
-  border: 1px solid rgba(0,0,0,0.08) !important;
-  background: #fff !important;
-  padding: 10px !important;
-  min-height: var(--tile-min-height) !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-  align-items: center !important;
-}
-
-/* metric style inside tiles */
-.rmp-card .metric {
-  font-size: 1.1rem !important;
+/* Override inner markdown <p>, spans, small, a, li inside buttons/tiles */
+div[class*="st-emotion-cache"] .stButton button .stMarkdownContainer p,
+.stApp .stButton button .stMarkdownContainer p,
+div[class*="st-emotion-cache"] .stButton button p,
+.stApp .stButton button p,
+div[class*="st-emotion-cache"] .stMarkdownContainer p,
+.stApp .stMarkdownContainer p,
+div[class*="st-emotion-cache"] .stMarkdownContainer span,
+.stApp .stMarkdownContainer span,
+div[class*="st-emotion-cache"] .stMarkdownContainer small,
+.stApp .stMarkdownContainer small,
+div[class*="st-emotion-cache"] .stMarkdownContainer li,
+.stApp .stMarkdownContainer li,
+div[class*="st-emotion-cache"] .stMarkdownContainer a,
+.stApp .stMarkdownContainer a {
+  color: #ffffff !important;
+  opacity: 1 !important;
+  filter: none !important;
+  -webkit-text-fill-color: #ffffff !important;
   font-weight: 700 !important;
-  margin-top: 6px !important;
-  color: #222 !important;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.18) !important;
 }
 
-/* reduce button size inside tiles */
-.rmp-card .stButton > button {
-  min-width: 100px !important;
-  padding: 8px 12px !important;
+/* Ensure nested nodes inherit and are visible */
+div[class*="st-emotion-cache"] .stButton button .stMarkdownContainer *,
+.stApp .stButton button .stMarkdownContainer *,
+div[class*="st-emotion-cache"] .stMarkdownContainer *,
+.stApp .stMarkdownContainer * {
+  color: inherit !important;
+  opacity: 1 !important;
+  filter: none !important;
+  -webkit-text-fill-color: inherit !important;
 }
 
-/* avoid horizontal scrolling */
-html, body, .block-container {
-  overflow-x: hidden !important;
+/* Neutralize inline 'color' styles on KPI area (if any) */
+div[class*="st-emotion-cache"] .rmp-card.kpi-card [style*="color"],
+.stApp .rmp-card.kpi-card [style*="color"] {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
 }
+
+/* Buttons: dark surface so white text has contrast */
+div[class*="st-emotion-cache"] .stButton button,
+.stApp .stButton button {
+  background: rgba(12,22,55,0.96) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.04) !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+
+/* Defensive: undo low opacity on KPI ancestors */
+div[class*="st-emotion-cache"] .rmp-card.kpi-card, div[class*="st-emotion-cache"] .rmp-card.kpi-card * {
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+/* FINAL override: make ALL Streamlit secondary buttons readable */
+.stButton > button[kind="secondary"] {
+  background: rgba(12,22,55,0.96) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border: 1px solid rgba(255,255,255,0.04) !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* --- RMP contrast fixes --- */
+
+/* Ensure header area (top KPI row) uses white text on the blue background */
+.rmp-scope .header-card,
+.rmp-scope .header-title,
+.rmp-scope .header-date,
+.rmp-scope .kpi-value,
+.rmp-scope .kpi-title {
+  color: #ffffff !important;        /* bright white text */
+  text-shadow: 0 1px 0 rgba(0,0,0,0.15);
+}
+
+/* Make KPI numbers (metrics) more visible and larger */
+.rmp-scope .kpi-value, 
+.rmp-scope .metric {
+  font-weight: 800 !important;
+  font-size: 1.6rem !important;
+  opacity: 1 !important;            /* remove any fading */
+}
+
+/* Subcard (tile) buttons: ensure readable color on blue */
+
+
+/* If a tile sits on a dark background (header), force white text */
+.rmp-scope .header-card .stButton > button,
+.rmp-scope .header-card,
+.rmp-scope .rmp-card.header-card {
+  color: #fff !important;
+}
+
+/* Defensive - ensure the strong global selector doesn't force unreadable colors */
+.rmp-scope *[style*="color:"] {
+  /* keep inline styles but avoid low-opacity */
+  opacity: 1 !important;
+}
+
+/* Optional: if you want KPI icons to be clearer */
+.rmp-scope .kpi-title > img, .rmp-scope .kpi-title svg {
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+
+
+
+
+
+
+/* --- RMP contrast fixes (added by assistant) --- */
+
+/* Ensure header area (top KPI row) uses white text on the blue background */
+.rmp-scope .header-card,
+.rmp-scope .header-title,
+.rmp-scope .header-date,
+.rmp-scope .kpi-value,
+.rmp-scope .kpi-title {
+  color: #ffffff !important;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.15) !important;
+  opacity: 1 !important;
+}
+
+/* Make KPI numbers (metrics) more visible and larger */
+.rmp-scope .kpi-value,
+.rmp-scope .metric {
+  font-weight: 800 !important;
+  font-size: 1.6rem !important;
+  opacity: 1 !important;
+}
+
+/* Subcard (tile) buttons: ensure readable color on blue */
+
+
+/* If a tile sits on a dark background (header), force white text */
+.rmp-scope .header-card .stButton > button,
+.rmp-scope .header-card,
+.rmp-scope .rmp-card.header-card {
+  color: #fff !important;
+  opacity: 1 !important;
+}
+
+/* Defensive - ensure the strong global selector doesn't force unreadable colors */
+.rmp-scope *[style*="color:"] {
+  opacity: 1 !important;
+}
+
+/* Optional: ensure icons are visible */
+.rmp-scope .kpi-title > img, .rmp-scope .kpi-title svg {
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+/* =======================
+   FINAL ENFORCED THEME OVERRIDES
+   Place this at the VERY END of static/style.css
+   ======================= */
+
+/* 1) Force card/tile background and text color (covers children) */
+.rmp-scope .rmp-card,
+.rmp-scope .rmp-section,
+.rmp-scope .rmp-tile,
+.rmp-scope .tile,
+div.stMarkdown div.rmp-card,
+div.stMarkdown div.rmp-card * {
+  background-color: rgba(6,12,28,0.96) !important;   /* dark tile */
+  color: #ffffff !important;                          /* white text */
+  border-color: rgba(255,255,255,0.06) !important;
+  box-shadow: 0 6px 14px rgba(2,6,23,0.14) !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+/* 2) KPI specific selectors (numbers, titles) */
+.rmp-scope .kpi-title,
+.rmp-scope .kpi-value,
+.rmp-scope .metric,
+div.stMarkdown .kpi-title,
+div.stMarkdown .kpi-value {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  opacity: 1 !important;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.25) !important;
+  filter: none !important;
+}
+
+/* 3) Ensure Streamlit button wrappers (tile overlays / card buttons) inherit the dark look */
+.rmp-scope div[data-testid="stButton"] > button,
+.rmp-scope .stButton > button {
+  background: rgba(6,12,28,0.0) !important; /* make button transparent so underlying dark tile shows */
+  color: inherit !important;
+  opacity: 1 !important;
+}
+
+/* 4) In case the app injects inline styles on the wrapper, force child text color too */
+.rmp-scope .rmp-card.kpi-card * {
+  color: #fff !important;
+  opacity: 1 !important;
+}
+
+/* 5) Defensive: remove any accidental fade inherited from broad selectors */
+.rmp-scope *[style*="color:"] {
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+/* 6) Keep header cards readable */
+.rmp-scope .header-card,
+.rmp-scope .header-title,
+.rmp-scope .header-date {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+
+
+
+/* === Surgical final overrides: ensure button overlays stay transparent and tiles stay dark === */
+div[class*="st-emotion-cache"] .rmp-card.kpi-card,
+.stApp .rmp-card.kpi-card,
+.rmp-scope .rmp-card.kpi-card {
+  background: rgba(12,22,55,0.96) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  filter: none !important;
+  border: 1px solid rgba(255,255,255,0.04) !important;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.35) !important;
+}
+
+/* Make overlay buttons transparent so underlying tile shows through */
+div[class*="st-emotion-cache"] div[data-testid="stButton"] > button,
+div[data-testid="stButton"] > button,
+.stApp div[data-testid="stButton"] > button,
+.stApp .stButton > button {
+  background: transparent !important;
+  color: inherit !important;
+  -webkit-text-fill-color: inherit !important;
+  opacity: 1 !important;
+  border: none !important;
+  box-shadow: none !important;
+  pointer-events: auto !important;
+}
+
+/* Ensure any inline style color inside KPI area is overridden to white */
+.rmp-scope .rmp-card.kpi-card [style*="color"],
+div[class*="st-emotion-cache"] .rmp-card.kpi-card [style*="color"] {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* Force child markdown to inherit white */
+div[class*="st-emotion-cache"] .stMarkdown, .stApp .stMarkdown, .rmp-scope .stMarkdown {
+  color: inherit !important;
+}
+div[class*="st-emotion-cache"] .stMarkdown * { color: inherit !important; opacity: 1 !important; }
+
+
