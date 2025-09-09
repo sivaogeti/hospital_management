@@ -49,24 +49,6 @@ html, body, [data-testid="stAppViewContainer"] { background: #f4f8fb; }
 """
 
 
-st.markdown(
-    """
-    <style>
-    /* Force Streamlit horizontal blocks (columns) not to wrap and allow horizontal scroll */
-    [data-testid="stHorizontalBlock"] {
-        flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-    }
-    [data-testid="stHorizontalBlock"] > * {
-        min-width: 300px !important;
-        flex: 0 0 auto !important;
-    }
-    /* Optional: give generic containers similar treatment */
-    .block-container, .stApp { overflow-x: visible !important; }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
 
 # place after you have rendered the tiles/columns
 import streamlit.components.v1 as components
@@ -106,11 +88,8 @@ try:
     import streamlit as st  # ensure st is available
     st.set_page_config(layout="wide")
     st.markdown("""<style>
-    /* Force Streamlit horizontal blocks (columns) to not wrap; allow horizontal scroll instead */
-    [data-testid="stHorizontalBlock"] {
-        flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-    }
+  
+  
     /* Optional: increase min-width for column children so they stay side-by-side */
     [data-testid="stVerticalBlock"] > div {
         min-width: 300px;
