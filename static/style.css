@@ -1,13 +1,7 @@
-/* =========================
-   static/style.css
-   Dashboard grid override
-   ========================= */
+/* static/style.css - Force 2 columns down to 340px, fallback to 1 column below that */
+:root { --tile-gap: 12px; }
 
-:root {
-  --tile-gap: 12px;
-}
-
-/* ensure container uses full width */
+/* ensure Streamlit container uses full width */
 .block-container {
   max-width: 100% !important;
   padding-left: 1rem !important;
@@ -15,40 +9,42 @@
   box-sizing: border-box !important;
 }
 
-/* dashboard grid: 2 columns on phones, 4 on large desktops */
+/* grid selectors (strong) */
 .dashboard-grid,
 div.dashboard-grid,
-section.dashboard-grid {
+section.dashboard-grid,
+main .dashboard-grid {
   display: grid !important;
   gap: var(--tile-gap) !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   align-items: stretch !important;
 }
 
-/* tiny phones: switch to 1 column */
+/* extremely narrow screens: single column */
 @media (max-width: 340px) {
   .dashboard-grid,
   div.dashboard-grid,
-  section.dashboard-grid {
+  section.dashboard-grid,
+  main .dashboard-grid {
     grid-template-columns: 1fr !important;
   }
 }
 
-/* fallback: override Streamlit auto-fit grid */
+/* override Streamlit's auto-fit/minmax default if present */
 *[style*="grid-template-columns: repeat(auto-fit"] {
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
 }
 
-/* force children not to set large min-widths */
+/* prevent child elements from forcing large min-widths */
 [data-testid^="stColumn"] > *,
 [data-testid="stHorizontalBlock"] > *,
-.rmp-card, .stBlock {
+.rmp-card, .stBlock, .st-b {
   min-width: 0 !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
 }
 
-/* card/tile styling */
+/* tile/cell style */
 .rmp-card {
   border-radius: 12px !important;
   border: 1px solid rgba(0,0,0,0.08) !important;
@@ -59,13 +55,6 @@ section.dashboard-grid {
   flex-direction: column !important;
   justify-content: center !important;
   align-items: center !important;
-}
-
-/* metric text inside cards */
-.rmp-card .metric {
-  font-size: 1.6rem !important;
-  margin-top: 6px !important;
-  color: #222 !important;
 }
 
 /* avoid horizontal scrolling */
