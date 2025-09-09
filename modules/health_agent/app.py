@@ -94,13 +94,24 @@ import streamlit as st
 from pathlib import Path
 
 def local_css(path: str):
+    """Inject local CSS into the Streamlit app"""
     p = Path(path)
     if p.exists():
         css = p.read_text(encoding="utf-8")
         st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
     else:
-        # fallback: inline CSS directly (if static file missing)
-        st.markdown("<style>.dashboard-grid{grid-template-columns:repeat(2,1fr)!important;}</style>", unsafe_allow_html=True)
+        # fallback if file not found
+        st.markdown(
+            """
+            <style>
+            .dashboard-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            @media (max-width:340px) {
+                .dashboard-grid { grid-template-columns: 1fr !important; }
+            }
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
 
 # call this early in your app
 local_css("static/style.css")  # adjust path if you use 'style.css'
