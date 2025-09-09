@@ -990,16 +990,23 @@ def render_health_agent_dashboard(user):
     st.markdown('<div class="dashboard-grid">', unsafe_allow_html=True)
 
     # --- TOP KPI ROW (side-by-side using columns) ---
-    k1, k2, k3, k4 = st.columns(4)
-    with k1:
-        _kpi_card("👥", "Patients", str(_count_rows("patients")))
-    with k2:
-        _kpi_card("📝", "Today's Visits", str(_today_visits_count()))
-    with k3:
-        _kpi_card("🧪", "Pending Tests", str(_pending_tests_count()))
-    with k4:
-        _kpi_card("📦", "Low Stock (≤5)", str(_low_stock_count(5)))
-
+    # simple Streamlit 2x2 layout (no CSS)
+    cols = st.columns(2)
+    with cols[0]:
+        st.markdown("### Patients")
+        st.markdown("4")
+    with cols[1]:
+        st.markdown("### Record Vitals")
+        st.markdown("2931")
+    
+    # next row
+    cols = st.columns(2)
+    with cols[0]:
+        st.markdown("### Sugar Blood Test")
+        st.markdown("2931")
+    with cols[1]:
+        st.markdown("### Inventory / Stock")
+        st.markdown("0")
 
     st.markdown('</div>', unsafe_allow_html=True)  
     st.write("")
