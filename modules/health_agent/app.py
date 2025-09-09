@@ -68,6 +68,35 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# place after you have rendered the tiles/columns
+import streamlit.components.v1 as components
+
+components.html("""
+<script>
+(function(){
+  try {
+    var apply = function(){
+      var g = document.querySelector('.dashboard-grid') || document.querySelector('[data-testid^="stHorizontalBlock"]');
+      if (!g) return;
+      if (window.innerWidth >= 340) {
+        g.style.gridTemplateColumns = 'repeat(2, 1fr)';
+      } else {
+        g.style.gridTemplateColumns = '1fr';
+      }
+      // reduce child min-widths
+      var children = g.querySelectorAll('*');
+      children.forEach(function(c){ c.style.minWidth='0'; c.style.maxWidth='100%'; c.style.boxSizing='border-box'; });
+      console.log('DEBUG: applied dashboard-grid fix, width=' + window.innerWidth);
+    };
+    // run now and on resize
+    setTimeout(apply, 600);
+    window.addEventListener('resize', apply);
+  } catch(e) {
+    console.log('ERROR injecting dashboard fix', e);
+  }
+})();
+</script>
+""", height=1)
 
 
 
