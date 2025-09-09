@@ -92,7 +92,7 @@ try:
   
     /* Optional: increase min-width for column children so they stay side-by-side */
     [data-testid="stVerticalBlock"] > div {
-        min-width: 300px;
+        min-width: 0 !important;
     }
     </style>""", unsafe_allow_html=True)
 except Exception:
