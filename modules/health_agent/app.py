@@ -11,115 +11,73 @@ import traceback
 
 import streamlit as st
 
+
+
+
 # Force wide layout (before any other Streamlit UI calls)
 st.set_page_config(layout="wide")
 
-RMP_CSS = """
-<style>
-html, body, [data-testid="stAppViewContainer"] { background: #f4f8fb; }
+st.markdown(
+    """
+    <style>
+    /* Force Streamlit horizontal blocks (columns) not to wrap and allow horizontal scroll */
+    [data-testid="stHorizontalBlock"] {
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+    }
+    [data-testid="stHorizontalBlock"] > * {
+        min-width: 300px !important;
+        flex: 0 0 auto !important;
+    }
+    /* Optional: give generic containers similar treatment */
+    .block-container, .stApp { overflow-x: visible !important; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
-/* Scope container so our styles don't leak */
-.rmp-scope { color: #1e293b; }
-
-/* Dashboard grid: force two columns (desktop-style) even on narrow viewports */
-.dashboard-grid {
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 20px !important;
-  align-items: start !important;
-}
-
-/* Make sure the tiles keep their visual sizing inside the grid */
-.dashboard-grid .rmp-card,
-.dashboard-grid div[data-testid="stButton"] > button {
-  width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-/* Optional: horizontal scroll on very small devices
-@media (max-width: 420px) {
-   .dashboard-grid {
-      grid-template-columns: repeat(2, minmax(200px, 1fr));
-      grid-auto-flow: column;
-      overflow-x:auto;
-   }
-}
-*/
-</style>
-"""
-
-
-
-# place after you have rendered the tiles/columns
-import streamlit.components.v1 as components
-
-components.html("""
-<script>
-(function(){
-  try {
-    var apply = function(){
-      var g = document.querySelector('.dashboard-grid') || document.querySelector('[data-testid^="stHorizontalBlock"]');
-      if (!g) return;
-      if (window.innerWidth >= 340) {
-        g.style.gridTemplateColumns = 'repeat(2, 1fr)';
-      } else {
-        g.style.gridTemplateColumns = '1fr';
-      }
-      // reduce child min-widths
-      var children = g.querySelectorAll('*');
-      children.forEach(function(c){ c.style.minWidth='0'; c.style.maxWidth='100%'; c.style.boxSizing='border-box'; });
-      console.log('DEBUG: applied dashboard-grid fix, width=' + window.innerWidth);
-    };
-    // run now and on resize
-    setTimeout(apply, 600);
-    window.addEventListener('resize', apply);
-  } catch(e) {
-    console.log('ERROR injecting dashboard fix', e);
-  }
-})();
-</script>
-""", height=1)
 
 
 
 
 # --- Added to force wide layout and prevent Streamlit from stacking columns on narrow viewports ---
-try:
-    import streamlit as st  # ensure st is available
-    st.set_page_config(layout="wide")
-    st.markdown("""<style>
-  
-  
-    /* Optional: increase min-width for column children so they stay side-by-side */
-    [data-testid="stVerticalBlock"] > div {
-        min-width: 0 !important;
-    }
-    </style>""", unsafe_allow_html=True)
-except Exception:
-    pass
-# --- End addition ---
+import streamlit as st  # ensure st is available
+
+
+# --- Auto-apply pending redirect if user becomes authenticated during a run ---
+# --- Auto-apply pending redirect if user becomes authenticated based on session_state keys ---
+import os
+
+import os
 import streamlit as st
-from pathlib import Path
 
-def local_css(path: str):
-    p = Path(path)
-    if p.exists():
-        css = p.read_text(encoding="utf-8")
-        st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
-    else:
-        # fallback inline override
-        st.markdown(
-            """
-            <style>
-            .dashboard-grid { grid-template-columns: repeat(2, 1fr) !important; }
-            @media (max-width:300px) { .dashboard-grid { grid-template-columns: 1fr !important; } }
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
+def local_css_from_project_root(*path_parts):
+    """
+    Safely load a CSS file relative to project root (assumes project root is two levels above this module).
+    Returns CSS text or None if not found.
+    """
+    # file dirname of this module
+    this_dir = os.path.dirname(__file__)
+    # adjust how many levels up your project root is — here modules/health_agent -> project root = ../../
+    project_root = os.path.normpath(os.path.join(this_dir, "..", ".."))
+    css_path = os.path.join(project_root, *path_parts)
+    css_path = os.path.abspath(css_path)
 
-# call this early in your app
-local_css("static/style.css")  # adjust path if you use 'style.css'
+    if not os.path.exists(css_path):
+        # helpful debug output — remove or change to logging in production
+        st.error(f"CSS file not found: {css_path}")
+        print(f"[DEBUG] CSS file not found: {css_path}")
+        return None
+
+    with open(css_path, "r", encoding="utf-8") as f:
+        return f.read()
+
+# Usage (from same file)
+css = local_css_from_project_root("static", "style.css")
+if css:
+    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+
+
 
 if "rmp_page" not in st.session_state:
     st.session_state["rmp_page"] = "dashboard"
@@ -172,74 +130,6 @@ def _current_sub(section: str, default: str = "New") -> str:
 
 
 
-def _sub_card(icon: str, title: str, btn_key: str, section: str, sub: str):
-    """
-    Render a sub-card as a full-tile clickable button (no separate 'Open' button).
-    Uses a marker div (id `submark_{btn_key}`) so CSS can style the Streamlit button that follows.
-    When clicked, sets the substate and reruns.
-    """
-    # resolve the target (keeps existing routing behavior)
-    dest = _resolve_target(btn_key, title, None)
-
-    # marker id so we can style only the following button via CSS
-    mid = f"submark_{btn_key}"
-
-    # place the marker
-    st.markdown(f'<div id="{mid}"></div>', unsafe_allow_html=True)
-
-    # build a simple label with icon + title (no metric)
-    label = f"{icon}  {title}"
-
-    # clickable full-card button
-    if st.button(label, key=btn_key, use_container_width=True):
-        # set the substate and rerun to reflect navigation
-        _set_substate(section, sub)
-        st.rerun()
-
-    # inject styles targeting the button that immediately follows our marker
-    st.markdown(
-        f"""
-        <style>
-          /* style only the st.button wrapper that immediately follows this marker */
-          div#{mid} + div[data-testid="stButton"] > button {{
-            height: var(--sub-card-height, 200px);
-            min-height: var(--sub-card-height, 200px);
-            border-radius: 14px !important;
-            border: 1px solid #e6e9ee;
-            box-shadow: 0 6px 14px rgba(2,132,199,.06);
-            background: #ffffff;
-            color: #0f172a;
-            text-align: center;
-            font-weight: 700;
-            white-space: pre-wrap;
-            line-height: 1.2;
-            padding: 18px;
-            font-size: 1.05rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 6px;
-          }}
-          /* hover */
-          div#{mid} + div[data-testid="stButton"] > button:hover {{
-            box-shadow: 0 8px 18px rgba(2,132,199,.10);
-            transform: translateY(-2px);
-          }}
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
-ROUTE_ALIASES = {
-    # extend this map if your router uses specific names
-    "btn_patients_new": "Patients_New",
-    "btn_patients_search": "Patients_Search",
-    "btn_stock_orders": "Stock_Order_List",
-    "btn_stock_low":    "Stock_Low_Alert",
-    # examples:
-    # "btn_vitals_new": "Record_Vitals_New",
-}
 
 
 def _resolve_target(key: str, title: str, target: str|None):
@@ -376,7 +266,7 @@ def _ensure_messages_table():
     cur.execute("""
         CREATE TABLE IF NOT EXISTS messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            sender_role TEXT NOT NULL,   -- 'Health Agent', 'Doctor', 'Admin', 'System'
+            sender_role TEXT NOT NULL,   -- 'RMP', 'Doctor', 'Admin', 'System'
             recipient_role TEXT NOT NULL,
             message TEXT NOT NULL,
             created_at TEXT NOT NULL
@@ -785,109 +675,6 @@ def _apply_theme():
 # =========================
 # Cards + Bottom nav
 # =========================
-def _square_card(icon, title, value, btn_text, key, target=None):
-    dest = _resolve_target(key, title, target)
-    wid  = f"wrap_{key}"      # unique wrapper id per tile
-    cid  = f"tile_{key}"      # id for the card itself
-    H    = 180                # MUST match .rmp-card height in style.css
-
-    # 1) Open a wrapper that contains BOTH the card and the button
-    st.markdown(
-        f"""
-        <div id="{wid}" class="rmp-tile-wrap" style="position:relative; height:{H}px;">
-          <div id="{cid}" class="rmp-card" style="position:relative; height:{H}px;">
-            <h3 style="margin:0 0 .25rem 0;">{icon} {title}</h3>
-            <div class="metric">{value}</div>
-          </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    # 2) Real Streamlit button (click handler)
-    if st.button("open", key=f"overlay_{key}"):
-        _go(dest); st.rerun()
-
-    # 3) Close the wrapper and apply overlay CSS scoped to it
-    st.markdown(
-        f"""
-          <style>
-            /* Make the Streamlit button cover the entire wrapper */
-            #{wid} > div[data-testid="stButton"] {{
-              position: absolute;
-              inset: 0;             /* top/right/bottom/left: 0 */
-              margin: 0 !important;
-              padding: 0 !important;
-              z-index: 2;
-            }}
-            #{wid} > div[data-testid="stButton"] > button {{
-              width: 100%;
-              height: 100%;
-              opacity: 0;           /* fully hide the 'open' label */
-              border: none;
-              background: transparent;
-              cursor: pointer;
-            }}
-            /* Keep the visual card underneath */
-            #{wid} > #{cid} {{ z-index: 1; }}
-          </style>
-        </div>  <!-- CLOSE #{wid} -->
-        """,
-        unsafe_allow_html=True,
-    )
-
-def _tile_button(icon: str, title: str, value: str, key: str, target: str | None = None):
-    """
-    A single big button styled as a card. Clicking anywhere on it navigates.
-    """
-    dest = _resolve_target(key, title, target)
-    mid  = f"mark_{key}"   # local marker to scope CSS to THIS tile only
-
-    # 1) A tiny marker so we can scope CSS to the NEXT st.button only
-    st.markdown(f'<div id="{mid}"></div>', unsafe_allow_html=True)
-
-    # 2) The actual Streamlit button (the whole tile)
-    #    Newlines in the label are shown because we set white-space: pre-wrap via CSS below.
-    label = f"{icon} {title}\n\n{value}" if value else f"{icon} {title}"
-    if st.button(label, key=f"tile_{key}", use_container_width=True):
-        _go(dest); st.rerun()
-
-    # 3) Style JUST the button that immediately follows the marker.
-    #    We don't rely on :has(); the adjacent sibling is the st.button wrapper Streamlit inserts.
-    st.markdown(
-        f"""
-        <style>
-          /* Style only the st.button wrapper that comes right after this marker */
-          div#{mid} + div[data-testid="stButton"] > button {{
-            height: 180px;                /* taller block */
-            border-radius: 16px !important;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 6px 14px rgba(2,132,199,.06);
-            background: #ffffff;
-            color: #1e293b;
-            text-align: center;
-            font-weight: 600;
-            white-space: pre-wrap;        /* allow two-line text */
-            line-height: 1.3;
-            padding: 14px;
-            font-size: 1.1rem;
-          }}
-          /* Hover feel like your old .rmp-card */
-          div#{mid} + div[data-testid="stButton"] > button:hover {{
-            box-shadow: 0 8px 18px rgba(2,132,199,.10);
-            transform: translateY(-2px);
-          }}
-          /*make metric bigger */
-          div#{mid} + div[data-testid="stButton"] > button .metric {{
-              display: block;
-              font-size: 2rem;
-              font-weight: 800;
-              margin-top: .5rem;
-          }}
-
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
 
 
 def _bottom_nav():
@@ -937,32 +724,10 @@ def _bottom_nav():
 # =========================
 
 def render_health_agent_dashboard(user):
-    from pathlib import Path
-    
-    # Small JS fallback to reapply a 2-column grid and reduce child min-widths.
-    import streamlit.components.v1 as components
-    components.html("""
-    <script>
-    (function(){
-      var enforce = function(){
-        var g = document.querySelector('.dashboard-grid') || document.querySelector('[data-testid^="stHorizontalBlock"]');
-        if (!g) return;
-        if (window.innerWidth >= 300) {
-          g.style.gridTemplateColumns = 'repeat(2, 1fr)';
-        } else {
-          g.style.gridTemplateColumns = '1fr';
-        }
-        g.querySelectorAll('*').forEach(function(c){
-          try { c.style.minWidth='0'; c.style.maxWidth='100%'; c.style.boxSizing='border-box'; } catch(e){}
-        });
-        console.log('DEBUG: grid fix applied, w=' + window.innerWidth + ', dpr=' + window.devicePixelRatio);
-      };
-      setTimeout(enforce, 500);
-      window.addEventListener('resize', enforce);
-    })();
-    </script>
-    """, height=1)
+    _apply_theme()
+    st.markdown('<div class="rmp-scope">', unsafe_allow_html=True)
 
+    from pathlib import Path
 
     def _find_logo_file():
         candidates = [
@@ -1020,23 +785,16 @@ def render_health_agent_dashboard(user):
     st.markdown('<div class="dashboard-grid">', unsafe_allow_html=True)
 
     # --- TOP KPI ROW (side-by-side using columns) ---
-    # simple Streamlit 2x2 layout (no CSS)
-    cols = st.columns(2)
-    with cols[0]:
-        st.markdown("### Patients")
-        st.markdown("4")
-    with cols[1]:
-        st.markdown("### Record Vitals")
-        st.markdown("2931")
-    
-    # next row
-    cols = st.columns(2)
-    with cols[0]:
-        st.markdown("### Sugar Blood Test")
-        st.markdown("2931")
-    with cols[1]:
-        st.markdown("### Inventory / Stock")
-        st.markdown("0")
+    k1, k2, k3, k4 = st.columns(4)
+    with k1:
+        _kpi_card("👥", "Patients", str(_count_rows("patients")))
+    with k2:
+        _kpi_card("📝", "Today's Visits", str(_today_visits_count()))
+    with k3:
+        _kpi_card("🧪", "Pending Tests", str(_pending_tests_count()))
+    with k4:
+        _kpi_card("📦", "Low Stock (≤5)", str(_low_stock_count(5)))
+
 
     st.markdown('</div>', unsafe_allow_html=True)  
     st.write("")
@@ -1060,39 +818,127 @@ def render_health_agent_dashboard(user):
 
     _route_from_query()
 
-    # ---------- Dashboard: 2×2 tiles ----------
-    if section == "Dashboard":
-        # ---------- Dashboard tiles (2 x 2) ----------
-        r1c1, r1c2 = st.columns(2)
-        with r1c1:
-            _tile_button("👥", "Patients", str(_count_rows("patients")), "dash_patients", target="Patients")
-        with r1c2:
-            _tile_button("🩺", "Record Vitals", str(_count_rows("vitals")), "dash_vitals", target="Record Vitals")
 
-        r2c1, r2c2 = st.columns(2)
-        with r2c1:
-            _tile_button("🧪", "Sugar Blood Test", str(_count_rows("blood_sugar_tests")), "dash_sugar", target="Sugar Blood Test")
-        with r2c2:
-            total_stock = 0
+    # ---------- Dashboard: circular 2-per-row tiles (replaced) ----------
+    if section == "Dashboard":
+        # Dashboard: 3-per-row clickable circular tiles centered
+        try:
+            total_patients = _count_rows("patients")
+        except Exception:
+            total_patients = 0
+        try:
+            total_vitals = _count_rows("vitals")
+        except Exception:
+            total_vitals = 0
+        try:
+            total_blood_sugar = _count_rows("blood_sugar_tests")
+        except Exception:
+            total_blood_sugar = 0
+        total_stock = 0
+        try:
             if get_connection:
                 rows = _get_stock()
                 total_stock = sum([(r[3] or 0) for r in rows])
-            _tile_button("📦", "Inventory / Stock", str(total_stock), "dash_stock", target="Stock")
+        except Exception:
+            total_stock = 0
 
-        r3c1, r3c2 = st.columns(2)
-        with r3c1:
-            _tile_button("📊", "Health Profiles", "","dash_profiles", target="Health Profiles")
-        with r3c2:
-            _tile_button("📑", "Reports", "", "dash_reports", target="Reports")
+        cards = [
+            {"icon":"👥","title":"Patients","value": str(total_patients),"key":"dash_patients","target":"Patients"},
+            {"icon":"📅","title":"Appointments","value":"0","key":"dash_appointments","target":"Appointments"},
+            {"icon":"🩺","title":"Record Vitals","value": str(total_vitals),"key":"dash_vitals","target":"Record Vitals"},
+            {"icon":"🧪","title":"Sugar Blood Test","value": str(total_blood_sugar),"key":"dash_sugar","target":"Sugar Blood Test"},
+            {"icon":"📦","title":"Inventory / Stock","value": str(total_stock),"key":"dash_stock","target":"Stock"},
+            {"icon":"📊","title":"Health Profiles","value": "","key":"dash_profiles","target":"Health Profiles"},
+            {"icon":"📑","title":"Reports","value": "","key":"dash_reports","target":"Reports"},
+        ]
 
+        st.markdown("""
+        <style>
+        /* GRID: 3 columns on wide viewports, 2 on medium, 1 on narrow */
+        .rmp-tile-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 320px);
+          gap: 32px;
+          justify-content: center;
+          align-items: center;
+          margin: 20px auto 30px;
+          padding: 6px;
+          width: 100%;
+          box-sizing: border-box;
+        }
+        .rmp-tile-wrap {
+          display:flex; align-items:center; justify-content:center;
+          width:320px; height:320px; position: relative;
+        }
+        .rmp-circle-card {
+          width:280px; height:280px; border-radius:50%;
+          background: linear-gradient(180deg,#fff 0%, #fbf6fb 100%);
+          display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+          box-shadow: 0 18px 30px rgba(18,24,44,0.06);
+          border:1px solid rgba(15,23,42,0.03);
+          padding:12px; position: relative;
+        }
+        .rmp-circle-icon { font-size:2.2rem; margin-bottom:12px; color:#6b21a8; }
+        .rmp-circle-title { font-size:1.05rem; font-weight:700; color:#0f172a; margin-bottom:6px; }
+        .rmp-circle-value { font-size:1.35rem; font-weight:800; color:#0f172a; }
+        .rmp-tile-grid .stButton, .rmp-tile-grid div[data-testid="stButton"], .rmp-tile-grid div[class*="stButton"] {
+          position:absolute !important; inset:0 !important; margin:0 !important; padding:0 !important; background:transparent !important; border:none !important; box-shadow:none !important; z-index:30 !important;
+        }
+        .rmp-tile-grid .stButton > button, .rmp-tile-grid div[data-testid="stButton"] > button, .rmp-tile-grid div[class*="stButton"] > button {
+          opacity:0 !important; width:100% !important; height:100% !important; padding:0 !important; margin:0 !important; cursor:pointer !important; background:transparent !important; border:none !important;
+        }
+        @media (max-width:1200px) {
+          .rmp-tile-grid { grid-template-columns: repeat(2, 1fr); }
+          .rmp-tile-wrap { width:280px; height:280px; }
+          .rmp-circle-card { width:240px; height:240px; }
+        }
+        @media (max-width:700px) {
+          .rmp-tile-grid { grid-template-columns: repeat(1, 1fr); }
+          .rmp-tile-wrap { width:200px; height:200px; }
+          .rmp-circle-card { width:160px; height:160px; }
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
+        
+        # Render tiles in rows of 3 using Streamlit columns so they appear side-by-side reliably
+        for row_start in range(0, len(cards), 3):
+            row_cards = cards[row_start:row_start+3]
+            cols = st.columns(3, gap='large')
+            for col_i, c in enumerate(row_cards):
+                with cols[col_i]:
+                    st.markdown(f'''
+                      <div class="rmp-tile-wrap" style="display:flex;align-items:center;justify-content:center;">
+                        <div class="rmp-circle-card" role="button" aria-label="{c['title']}">
+                            <div class="rmp-circle-icon">{c['icon']}</div>
+                            <div class="rmp-circle-title">{c['title']}</div>
+                            <div class="rmp-circle-value">{c['value']}</div>
+                        </div>
+                      </div>
+                    ''', unsafe_allow_html=True)
+                    btn_key = f"btn_{c.get('key','tile')}_{row_start + col_i}"
+                    # place an actual Streamlit button (visible) underneath the card to capture clicks reliably
+                    if st.button(f"Open {c['title']}", key=btn_key, use_container_width=True):
+                        st.session_state['rmp_section'] = c['target']
+                        if c['target'] == "Patients":
+                            st.session_state.setdefault("patients_sub","Menu")
+                        if c['target'] == "Stock":
+                            st.session_state.setdefault("stock_sub","Menu")
+                        try:
+                            remaining = dict(st.query_params)
+                            remaining.pop("rmp_section", None)
+                            if remaining:
+                                st.set_query_params(**remaining)
+                            else:
+                                st.set_query_params()
+                        except Exception:
+                            pass
+                        st.rerun()
+
+        # spacer to keep consistent look
+        st.markdown('<div style=\"height:18px\"></div>', unsafe_allow_html=True)
         _bottom_nav()
         st.markdown('</div>', unsafe_allow_html=True)
-        return
-
-        # always show bottom nav on front page
-        _bottom_nav()
-
-        st.markdown('</div>', unsafe_allow_html=True)  # close rmp-scope
         return
 
     # ---------- Detail pages ----------
@@ -1994,7 +1840,7 @@ def render_health_agent_dashboard(user):
                 msg = r["message"]
                 ts = r["created_at"]
 
-                if sender == "Health Agent":
+                if sender == "RMP":
                     align = "right"
                     color = "#d1f7c4"  # light green
                 elif sender in ("Doctor", "Admin"):
@@ -2029,7 +1875,7 @@ def render_health_agent_dashboard(user):
                 
                 cur.execute(
                     "INSERT INTO messages (sender_role, recipient_role, message, created_at) VALUES (?,?,?,?)",
-                    ("Health Agent", recipient, new_msg.strip(), datetime.utcnow().isoformat())
+                    ("RMP", recipient, new_msg.strip(), datetime.utcnow().isoformat())
                 )
                 conn.commit(); conn.close()
                 st.rerun()
@@ -2191,11 +2037,6 @@ def render_health_agent_dashboard(user):
 
     # close scope
     st.markdown('</div>', unsafe_allow_html=True)
-
-from typing import Optional
-
-from datetime import datetime, timezone
-from typing import Optional
 
 from datetime import datetime, timezone
 from typing import Optional
@@ -2990,3 +2831,138 @@ def _sugar_next_due(recorded_at_str: str, frequency_days) -> str:
 
     next_dt = dt + timedelta(days=freq)
     return next_dt.strftime("%d %B %Y")
+
+
+# NOTE: Please ensure to call this after login success:
+# try:
+#     _apply_pending_redirect_after_login()
+# except Exception:
+#     pass
+
+
+# --- Auto-apply pending redirect if user becomes authenticated based on session_state keys ---
+def _auto_apply_pending_if_authenticated():
+    try:
+        if "pending_rmp_section" in st.session_state:
+            # consider user authenticated if session_state has keys other than 'theme' and 'pending_rmp_section'
+            keys = [k for k in st.session_state.keys() if k not in ("theme", "pending_rmp_section")]
+            if len(keys) > 0:
+                pending = st.session_state.pop("pending_rmp_section", None)
+                if pending:
+                    # apply pending rmp_section into session state and rerun
+                    st.session_state["rmp_section"] = pending
+                    try:
+                        # keep this safe — no extra assignments here
+                        pass
+                    except Exception:
+                        # swallow any exception to avoid breaking the app
+                        pass
+                    # rerun to navigate to the pending section
+                    try:
+                        st.rerun()
+                    except Exception:
+                        # older/newer Streamlit versions may require experimental_rerun or similar;
+                        # swallow to avoid app crash
+                        try:
+                            st.experimental_rerun()
+                        except Exception:
+                            pass
+    except Exception:
+        # make sure the app never crashes here
+        pass
+
+
+
+# call it every run to pick up when login sets session state
+try:
+    _auto_apply_pending_if_authenticated()
+except Exception:
+    pass
+
+# put near top of your file
+import streamlit as st
+import os
+from urllib.parse import quote_plus
+
+def _sub_card(icon: str, title: str, button_id: str, section: str = None, sub: str = None, value: int|str = ""):
+    """
+    Render a circular card that is clickable.
+    Clicking sets a query param like ?action=Patients_Patients_New
+    - icon: emoji or HTML for the icon
+    - title: displayed label
+    - button_id: unique id (kept for compatibility)
+    - section/sub: used to create action id
+    - value: number shown inside circle
+    """
+
+    # create an action string safe for URL
+    action = f"{section}_{sub}" if section and sub else button_id
+    action_esc = quote_plus(action)
+
+    # Inline CSS for the circles (scoped using a unique class name to avoid interfering with other styles)
+    circle_css = f"""
+    <style>
+    .click-circle-container {{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin: 24px 12px;
+    }}
+    .click-circle {{
+      display: inline-block;
+      width: 180px;           /* adjust size */
+      height: 180px;          /* adjust size */
+      border-radius: 50%;
+      background: white;
+      border: 4px solid rgba(0,0,0,0.06);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+      text-align: center;
+      text-decoration: none;
+      color: #222;
+      padding: 18px;
+      transition: transform .12s ease, box-shadow .12s ease;
+      overflow: hidden;
+    }}
+    .click-circle:hover {{
+      transform: translateY(-6px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+      border-color: rgba(220, 53, 69, 0.35); /* optional highlight on hover */
+    }}
+    .click-circle .icon {{
+      font-size: 30px;
+      margin-bottom: 8px;
+    }}
+    .click-circle .title {{
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }}
+    .click-circle .value {{
+      font-size: 28px;
+      font-weight: 700;
+      margin-top: 6px;
+    }}
+    /* make sure link inside Streamlit layout strips default anchor styles */
+    .click-circle:link, .click-circle:visited, .click-circle:active {{
+      color: inherit;
+    }}
+    </style>
+    """
+
+    # HTML for the clickable circle (anchor carries the action as query param)
+    html = f"""
+    {circle_css}
+    <div class="click-circle-container">
+      <a class="click-circle" href="?action={action_esc}" role="button" aria-label="{action}">
+        <div class="icon">{icon}</div>
+        <div class="title">{title}</div>
+        <div class="value">{value}</div>
+      </a>
+    </div>
+    """
+
+    # Use components.html to render raw HTML safely. Allow height to contain the circle.
+    # We use unsafe_allow_html via st.markdown embedding style+html, or you can use st.components.v1.html.
+    # Using st.markdown instead keeps things simpler:
+    st.markdown(html, unsafe_allow_html=True)
+

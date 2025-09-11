@@ -11,28 +11,25 @@ from db import get_user_by_username, verify_password, init_db
 
 st.set_page_config(page_title="Hospital App", layout="wide")
 
-import streamlit as st
 from pathlib import Path
 
-# def local_css(file_name):
-    # with open(file_name) as f:
-        # st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-# # Load once at the start of app
-# local_css("static/style.css")
+# -----------------------------
+# Global Background
+# -----------------------------
+def set_global_background():
+    st.markdown("""
+    <style>
+    html, body, [data-testid="stAppViewContainer"], .main, .block-container {
+        background: #0D47A1 !important;   /* unified deep blue */
+    }
+    header, footer {display: none !important;}
+    </style>
+    """, unsafe_allow_html=True)
 
 
-   
 # Ensure DB exists
 init_db()  # creates users.db if missing
-
-# -----------------------------
-# Login Form
-# -----------------------------
-
-
-
-
 
 
 # =========================
@@ -40,9 +37,8 @@ init_db()  # creates users.db if missing
 # =========================
 def render_login():
     import base64
-    import streamlit as st
 
-    # Load DPS banner
+    # Load Hospital Logo
     banner_b64 = ""
     try:
         with open("Logo_upscaled.png", "rb") as f:
@@ -50,26 +46,20 @@ def render_login():
     except Exception:
         pass
 
-    # CSS
-    st.markdown(f"""
+    # CSS for login card
+    st.markdown("""
     <style>
-    /* Background */
-    html, body, [data-testid="stAppViewContainer"], .main, .block-container {{
-        background: #0D47A1 !important;
-    }}
-    header, footer {{display: none !important;}}
-
     /* Banner */
-    .login-header img {{
+    .login-header img {
         width: 100%;
         max-width: 600px;
         height: auto;
         display: block;
         margin: 1rem auto;
-    }}
+    }
 
-    /* Login form container (no ghost box!) */
-    .stForm {{
+    /* Login form container */
+    .stForm {
         background: #fff;
         padding: 1.2rem;
         border-radius: 8px;
@@ -77,41 +67,47 @@ def render_login():
         width: 100%;
         max-width: 320px;
         margin: 0 auto; /* Center */
-    }}
+    }
 
-    /* Force visible labels */
-    label, .stTextInput label, .stPasswordInput label, .stSelectbox label {{
+    /* Labels */
+    label, .stTextInput label, .stPasswordInput label, .stSelectbox label {
         color: #000 !important;
         font-weight: 600 !important;
         opacity: 1 !important;
-    }}
+    }
 
-    /* Slimmer input fields */
-    input, select, textarea {{
-        height: 1.6rem !important;   /* ⬅️ reduced */
+    /* Input fields */
+    input, select, textarea {
+        height: 1.6rem !important;
         font-size: 0.85rem !important;
         border-radius: 5px !important;
         padding: 0 0.4rem !important;
-    }}
+    }
 
-    /* Slimmer button */
-    button[kind="secondary"] {{
+    /* Login button */
+    button[kind="secondary"] {
         width: 100%;
-        height: 1.9rem !important;   /* ⬅️ reduced */
+        height: 1.9rem !important;
         border-radius: 5px;
         font-weight: 600;
         font-size: 0.85rem !important;
-    }}
+    }
     </style>
     """, unsafe_allow_html=True)
 
-    # Banner
+    # Banner (logo or fallback text)
     if banner_b64:
-        st.markdown(f"<div class='login-header'><img src='data:image/png;base64,{banner_b64}'/></div>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div class='login-header'><img src='data:image/png;base64,{banner_b64}'/></div>",
+            unsafe_allow_html=True,
+        )
     else:
-        st.markdown("<h2 style='color:white;text-align:center;'>Mother Teresa Hospital</h2>", unsafe_allow_html=True)
+        st.markdown(
+            "<h2 style='color:white;text-align:center;'>Mother Teresa Hospital</h2>",
+            unsafe_allow_html=True,
+        )
 
-    # Login Form (direct, no extra wrapper divs)
+    # Login Form
     with st.form("login_form_modern", clear_on_submit=False):
         login_input = st.text_input("Login ID (Email / User ID)")
         password = st.text_input("Password", type="password")
@@ -129,7 +125,7 @@ def render_login():
                 "id": user_row["id"],
                 "username": user_row["username"],
                 "name": user_row["name"],
-                "role": user_row["role"]
+                "role": user_row["role"],
             }
             st.success(f"Logged in as {user_row['name']} ({user_row['role']})")
             st.rerun()
@@ -139,8 +135,10 @@ def render_login():
 # 4️⃣ Role-based Dashboards
 # =========================
 if "user" not in st.session_state:
+    set_global_background()
     render_login()
 else:
+    set_global_background()
     role = st.session_state["user"]["role"]
     user = st.session_state["user"]
 
@@ -154,4 +152,3 @@ else:
         render_management_dashboard(user)
     else:
         st.error("Unknown role")
-
