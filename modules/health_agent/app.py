@@ -804,8 +804,8 @@ def render_health_agent_dashboard(user):
     with k3:
         _kpi_card("🧪", "Pending Tests", str(_pending_tests_count()))
     with k4:
-        _kpi_card("📦", "Low Stock (≤5)
-st.markdown('</div>', unsafe_allow_html=True)", str(_low_stock_count(5)))
+        _kpi_card("📦", "Low Stock (≤5)", str(_low_stock_count(5)))
+st.markdown(\'</div>\', unsafe_allow_html=True)
 
 
     st.markdown('</div>', unsafe_allow_html=True)  
