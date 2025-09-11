@@ -17,6 +17,16 @@ import streamlit as st
 # Force wide layout (before any other Streamlit UI calls)
 st.set_page_config(layout="wide")
 
+# --- MOBILE LAYOUT HELPERS (injected by assistant) ---
+st.markdown("""
+<style>
+.top-kpi-row { display:flex; gap:12px; align-items:stretch; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:6px; }
+.top-kpi-row > * { flex:0 0 auto; min-width:220px; }
+[data-testid="stHorizontalBlock"] { flex-wrap: nowrap !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+[data-testid="stHorizontalBlock"] > * { min-width: 260px !important; flex: 0 0 auto !important; }
+</style>
+""", unsafe_allow_html=True)
+
 st.markdown(
     """
     <style>
@@ -784,7 +794,8 @@ def render_health_agent_dashboard(user):
     # ---- DASHBOARD GRID ----
     st.markdown('<div class="dashboard-grid">', unsafe_allow_html=True)
 
-    # --- TOP KPI ROW (side-by-side using columns) ---
+    st.markdown('<div class="top-kpi-row">', unsafe_allow_html=True)
+# --- TOP KPI ROW (side-by-side using columns) ---
     k1, k2, k3, k4 = st.columns(4)
     with k1:
         _kpi_card("👥", "Patients", str(_count_rows("patients")))
@@ -793,7 +804,8 @@ def render_health_agent_dashboard(user):
     with k3:
         _kpi_card("🧪", "Pending Tests", str(_pending_tests_count()))
     with k4:
-        _kpi_card("📦", "Low Stock (≤5)", str(_low_stock_count(5)))
+        _kpi_card("📦", "Low Stock (≤5)
+st.markdown('</div>', unsafe_allow_html=True)", str(_low_stock_count(5)))
 
 
     st.markdown('</div>', unsafe_allow_html=True)  
