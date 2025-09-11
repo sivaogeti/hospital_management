@@ -1,10 +1,4 @@
-/* (full contents — overwrite your static/style.css with this) */
-
-/* =========================
-   FINAL style.css (Applied)
-   High-contrast, robust overrides for KPI cards, buttons and form text.
-   Place this file in static/style.css (or style.css) and restart Streamlit.
-   ========================= */
+/* Assistant-updated style.css: mobile-friendly scrolling and contrast overrides */
 
 /* Layout helpers */
 .block-container { max-width: 1200px; padding-left: 1rem; padding-right: 1rem; }
@@ -15,234 +9,28 @@
 .rmp-card.kpi-card .kpi-title { font-weight:700; font-size:14px; line-height:1.15; margin-bottom:6px; }
 .rmp-card.kpi-card .kpi-value { font-weight:800; font-size:1.35rem; line-height:1.1; }
 
-/* Minimal safe form input baseline */
-input, textarea, select { opacity: 1 !important; filter: none !important; color: inherit !important; -webkit-text-fill-color: inherit !important; }
-
-/* -------------------- FINAL SURGICAL OVERRIDES -------------------- */
-/* Place at the end of the file so it wins over injected rules */
-
-/* KPI cards: dark background + white text for strong contrast */
-div[class*="st-emotion-cache"] .rmp-card.kpi-card,
-.stApp .rmp-card.kpi-card {
-  background: rgba(12,22,55,0.96) !important;
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-  opacity: 1 !important;
-  filter: none !important;
-  border: 1px solid rgba(255,255,255,0.04) !important;
-  box-shadow: 0 8px 22px rgba(0,0,0,0.35) !important;
-}
-
-/* Force KPI title and value to be strong and readable */
-div[class*="st-emotion-cache"] .rmp-card.kpi-card .kpi-title,
-.stApp .rmp-card.kpi-card .kpi-title {
-  color: #ffffff !important;
-  font-weight: 800 !important;
-  font-size: 16px !important;
-  opacity: 1 !important;
-  text-shadow: 0 1px 0 rgba(0,0,0,0.3) !important;
-}
-div[class*="st-emotion-cache"] .rmp-card.kpi-card .kpi-value,
-.stApp .rmp-card.kpi-card .kpi-value {
-  color: #ffffff !important;
-  font-weight: 900 !important;
-  font-size: 20px !important;
-  opacity: 1 !important;
-  text-shadow: 0 1px 0 rgba(0,0,0,0.25) !important;
-}
-
-/* Override inner markdown <p>, spans, small, a, li inside buttons/tiles */
-div[class*="st-emotion-cache"] .stButton button .stMarkdownContainer p,
-.stApp .stButton button .stMarkdownContainer p,
-div[class*="st-emotion-cache"] .stMarkdownContainer p,
-.stApp .stMarkdownContainer p,
-div[class*="st-emotion-cache"] .stMarkdownContainer span,
-.stApp .stMarkdownContainer span,
-div[class*="st-emotion-cache"] .stMarkdownContainer small,
-.stApp .stMarkdownContainer small,
-div[class*="st-emotion-cache"] .stMarkdownContainer li,
-.stApp .stMarkdownContainer li,
-div[class*="st-emotion-cache"] .stMarkdownContainer a,
-.stApp .stMarkdownContainer a {
-  color: #ffffff !important;
-  opacity: 1 !important;
-  filter: none !important;
-  -webkit-text-fill-color: #ffffff !important;
-  font-weight: 700 !important;
-  text-shadow: 0 1px 0 rgba(0,0,0,0.18) !important;
-}
-
-/* Ensure nested nodes inherit and are visible */
-div[class*="st-emotion-cache"] .stButton button .stMarkdownContainer *,
-.stApp .stButton button .stMarkdownContainer *,
-div[class*="st-emotion-cache"] .stMarkdownContainer *,
-.stApp .stMarkdownContainer * {
-  color: inherit !important;
-  opacity: 1 !important;
-  filter: none !important;
-  -webkit-text-fill-color: inherit !important;
-}
-
-/* Neutralize inline 'color' styles on KPI area (if any) */
-div[class*="st-emotion-cache"] .rmp-card.kpi-card [style*="color"],
-.stApp .rmp-card.kpi-card [style*="color"] {
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-  opacity: 1 !important;
-}
-
-/* Buttons: dark surface so white text has contrast */
-div[class*="st-emotion-cache"] .stButton button,
-.stApp .stButton button {
-  background: rgba(12,22,55,0.96) !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(255,255,255,0.04) !important;
-  box-shadow: none !important;
-  opacity: 1 !important;
-}
-
-/* Defensive: undo low opacity on KPI ancestors */
-div[class*="st-emotion-cache"] .rmp-card.kpi-card, div[class*="st-emotion-cache"] .rmp-card.kpi-card * {
-  opacity: 1 !important;
-  filter: none !important;
-}
-
-/* FINAL override: make ALL Streamlit secondary buttons readable */
-.stButton > button[kind="secondary"] {
-  background: rgba(12,22,55,0.96) !important;
-  color: #ffffff !important;
-  font-weight: 700 !important;
-  border: 1px solid rgba(255,255,255,0.04) !important;
-  -webkit-text-fill-color: #ffffff !important;
-  opacity: 1 !important;
-}
-
-/* --- RMP contrast fixes --- */
-
-/* Ensure header area (top KPI row) uses white text on the blue background */
-.rmp-scope .header-card,
-.rmp-scope .header-title,
-.rmp-scope .header-date,
-.rmp-scope .kpi-value,
-.rmp-scope .kpi-title {
-  color: #ffffff !important;        /* bright white text */
-  text-shadow: 0 1px 0 rgba(0,0,0,0.15);
-}
-
-/* Make KPI numbers (metrics) more visible and larger */
-.rmp-scope .kpi-value, 
-.rmp-scope .metric {
-  font-weight: 800 !important;
-  font-size: 1.6rem !important;
-  opacity: 1 !important;            /* remove any fading */
-}
-
-/* Subcard (tile) buttons: ensure readable color on blue */
-
-/* If a tile sits on a dark background (header), force white text */
-.rmp-scope .header-card .stButton > button,
-.rmp-scope .header-card,
-.rmp-scope .rmp-card.header-card {
-  color: #fff !important;
-}
-
-/* Defensive - ensure the strong global selector doesn't force unreadable colors */
-.rmp-scope *[style*="color:"] { opacity: 1 !important; }
-
-/* Optional: ensure icons are visible */
-.rmp-scope .kpi-title > img, .rmp-scope .kpi-title svg { filter: none !important; opacity: 1 !important; }
-
-
-/* =========================================
-   MOBILE / SMALL SCREEN LAYOUT ADJUSTMENTS
-   Force horizontal scrolling instead of stacked rows
-   ========================================= */
-
-/* Top KPI row: make it horizontally scrollable on narrow viewports */
-.top-kpi-row {
-  display: flex;
-  gap: 12px;
-  align-items: stretch;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 6px;
-}
+/* Mobile layout adjustments */
+.top-kpi-row { display: flex; gap: 12px; align-items: stretch; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 6px; }
 .top-kpi-row > * { flex: 0 0 auto; min-width: 220px; }
 
-/* Circular tile grid: on small screens use horizontal scroll (keeps tiles side-by-side) */
-.rmp-tile-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 320px);
-  gap: 32px;
-  justify-content: center;
-  align-items: center;
-  margin: 20px auto 30px;
-  padding: 6px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-/* Mobile override: switch to single-row horizontal scrolling */
+/* Circular tile grid: horizontal scroll on small screens */
+.rmp-tile-grid { display: grid; grid-template-columns: repeat(3, 320px); gap: 32px; justify-content: center; align-items: center; margin: 20px auto 30px; padding: 6px; width: 100%; box-sizing: border-box; }
 @media (max-width: 900px) {
-  .rmp-tile-grid {
-    display: flex !important;
-    flex-direction: row;
-    gap: 18px;
-    overflow-x: auto;
-    padding-bottom: 12px;
-    -webkit-overflow-scrolling: touch;
-    justify-content: flex-start;
-    margin-left: 12px;
-    margin-right: 12px;
-  }
-  .rmp-tile-wrap {
-    flex: 0 0 auto;
-    width: 260px !important;
-    height: 260px !important;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .rmp-circle-card {
-    width: 240px !important;
-    height: 240px !important;
-  }
+  .rmp-tile-grid { display:flex !important; flex-direction:row; gap:18px; overflow-x:auto; -webkit-overflow-scrolling: touch; justify-content:flex-start; margin-left:12px; margin-right:12px; }
+  .rmp-tile-wrap { flex: 0 0 auto; width:260px !important; height:260px !important; display:flex; align-items:center; justify-content:center; }
+  .rmp-circle-card { width:240px !important; height:240px !important; }
 }
 
-/* Extra mobile safety: ensure columns and horizontal blocks inside Streamlit don't wrap */
+/* Ensure horizontal Streamlit blocks don't wrap */
 [data-testid="stHorizontalBlock"] { flex-wrap: nowrap !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
 [data-testid="stHorizontalBlock"] > * { min-width: 260px !important; flex: 0 0 auto !important; }
 
-/* Ensure any overlay button on tiles remains transparent and clickable */
-div[data-testid="stButton"] > button { background: transparent !important; }
+/* Contrast overrides */
+.rmp-scope .kpi-value, .rmp-scope .metric { font-weight:800 !important; font-size:1.6rem !important; opacity:1 !important; color: #fff !important; }
+.rmp-scope .header-card, .rmp-scope .header-title { color:#fff !important; }
 
-/* === Surgical final overrides to keep contrast consistent === */
-div[class*="st-emotion-cache"] .rmp-card.kpi-card,
-.stApp .rmp-card.kpi-card,
-.rmp-scope .rmp-card.kpi-card {
-  background: rgba(12,22,55,0.96) !important;
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-  opacity: 1 !important;
-  filter: none !important;
-  border: 1px solid rgba(255,255,255,0.04) !important;
-  box-shadow: 0 8px 22px rgba(0,0,0,0.35) !important;
-}
+/* Make buttons readable */
+.stButton > button { background: rgba(12,22,55,0.96) !important; color:#fff !important; border: none !important; }
 
-/* Make overlay buttons transparent so underlying tile shows through */
-div[class*="st-emotion-cache"] div[data-testid="stButton"] > button,
-div[data-testid="stButton"] > button,
-.stApp div[data-testid="stButton"] > button,
-.stApp .stButton > button {
-  background: transparent !important;
-  color: inherit !important;
-  -webkit-text-fill-color: inherit !important;
-  opacity: 1 !important;
-  border: none !important;
-  box-shadow: none !important;
-  pointer-events: auto !important;
-}
-
-/* Force child markdown to inherit white */
-div[class*="st-emotion-cache"] .stMarkdown, .stApp .stMarkdown, .rmp-scope .stMarkdown {
-  color: inherit !important;
-}
-div[class*="st-emotion-cache"] .stMarkdown * { color: inherit !important; opacity: 1 !important; }
+/* Defensive final rules */
+div[class*="st-emotion-cache"] .stMarkdown, .stApp .stMarkdown { color: inherit !important; }
