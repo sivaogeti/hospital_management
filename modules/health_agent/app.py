@@ -794,8 +794,7 @@ def render_health_agent_dashboard(user):
     # ---- DASHBOARD GRID ----
     st.markdown('<div class="dashboard-grid">', unsafe_allow_html=True)
 
-    st.markdown('<div class="top-kpi-row">', unsafe_allow_html=True)
-# --- TOP KPI ROW (side-by-side using columns) ---
+    # --- TOP KPI ROW (side-by-side using columns) ---
     # k1, k2, k3, k4 = st.columns(4)
     # with k1:
         # _kpi_card("👥", "Patients", str(_count_rows("patients")))
@@ -805,7 +804,7 @@ def render_health_agent_dashboard(user):
         # _kpi_card("🧪", "Pending Tests", str(_pending_tests_count()))
     # with k4:
         # _kpi_card("📦", "Low Stock (≤5)", str(_low_stock_count(5)))
-#st.markdown(\'</div>\', unsafe_allow_html=True)
+#
 
 
     #st.markdown('</div>', unsafe_allow_html=True)  
@@ -962,41 +961,53 @@ def render_health_agent_dashboard(user):
         """, unsafe_allow_html=True)
 
         
-        # Render tiles in rows of 3 using Streamlit columns so they appear side-by-side reliably
-        for row_start in range(0, len(cards), 3):
-            row_cards = cards[row_start:row_start+3]
-            cols = st.columns(3, gap='large')
-            for col_i, c in enumerate(row_cards):
-                with cols[col_i]:
-                    st.markdown(f'''
-                      <div class="rmp-tile-wrap" style="display:flex;align-items:center;justify-content:center;">
-                        <div class="rmp-circle-card" role="button" aria-label="{c['title']}">
-                            <div class="rmp-circle-icon">{c['icon']}</div>
-                            <div class="rmp-circle-title">{c['title']}</div>
-                            <div class="rmp-circle-value">{c['value']}</div>
-                        </div>
-                      </div>
-                    ''', unsafe_allow_html=True)
-                    btn_key = f"btn_{c.get('key','tile')}_{row_start + col_i}"
-                    # place an actual Streamlit button (visible) underneath the card to capture clicks reliably
-                    if st.button(f"Open {c['title']}", key=btn_key, use_container_width=True):
-                        st.session_state['rmp_section'] = c['target']
-                        if c['target'] == "Patients":
-                            st.session_state.setdefault("patients_sub","Menu")
-                        if c['target'] == "Stock":
-                            st.session_state.setdefault("stock_sub","Menu")
-                        try:
-                            remaining = dict(st.query_params)
-                            remaining.pop("rmp_section", None)
-                            if remaining:
-                                st.set_query_params(**remaining)
-                            else:
-                                st.set_query_params()
-                        except Exception:
-                            pass
-                        st.rerun()
+        # --- BIG CARDS ROW replaced by assistant: horizontal scroller ---
+try:
+    patients_count = str(_count_rows("patients"))
+except Exception:
+    patients_count = "0"
+try:
+    appointments_count = str(_count_rows("appointments"))
+except Exception:
+    appointments_count = "0"
+try:
+    vitals_count = str(_count_rows("vitals"))
+except Exception:
+    vitals_count = "0"
 
-        # spacer to keep consistent look
+big_cards_markup = f'''
+<div class="rmp-tile-grid" style="overflow-x:auto; -webkit-overflow-scrolling:touch; padding:12px 6px;">
+  <div class="rmp-tile-wrap">
+    <div class="rmp-circle-card card-inner">
+      <div style="font-size:34px">👥</div>
+      <div style="font-weight:700;margin-top:12px">Patients</div>
+      <div style="font-size:22px;margin-top:8px">{patients_count}</div>
+    </div>
+  </div>
+  <div class="rmp-tile-wrap">
+    <div class="rmp-circle-card card-inner">
+      <div style="font-size:34px">📅</div>
+      <div style="font-weight:700;margin-top:12px">Appointments</div>
+      <div style="font-size:22px;margin-top:8px">{appointments_count}</div>
+    </div>
+  </div>
+  <div class="rmp-tile-wrap">
+    <div class="rmp-circle-card card-inner">
+      <div style="font-size:34px">🩺</div>
+      <div style="font-weight:700;margin-top:12px">Record Vitals</div>
+      <div style="font-size:22px;margin-top:8px">{vitals_count}</div>
+    </div>
+  </div>
+</div>
+'''
+st.markdown(big_cards_markup, unsafe_allow_html=True)
+
+    # spacer to keep consistent look
+    st.markdown('<div style="height:18px"></div>', unsafe_allow_html=True)
+    _bottom_nav()
+    st.markdown('</div>', unsafe_allow_html=True)
+    return
+
         st.markdown('<div style=\"height:18px\"></div>', unsafe_allow_html=True)
         _bottom_nav()
         st.markdown('</div>', unsafe_allow_html=True)
