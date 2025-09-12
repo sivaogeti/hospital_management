@@ -785,54 +785,54 @@ def render_health_agent_dashboard(user):
     st.markdown('<div class="dashboard-grid">', unsafe_allow_html=True)
 
     # --- TOP KPI ROW replaced by assistant: pure HTML horizontal scroller ---
-try:
-    patients_count = str(_count_rows("patients"))
-except Exception:
-    patients_count = "0"
-try:
-    visits_count = str(_today_visits_count())
-except Exception:
-    visits_count = "0"
-try:
-    pending_tests = str(_pending_tests_count())
-except Exception:
-    pending_tests = "0"
-try:
-    low_stock = str(_low_stock_count(5))
-except Exception:
-    low_stock = "0"
+    try:
+        patients_count = str(_count_rows("patients"))
+    except Exception:
+        patients_count = "0"
+    try:
+        visits_count = str(_today_visits_count())
+    except Exception:
+        visits_count = "0"
+    try:
+        pending_tests = str(_pending_tests_count())
+    except Exception:
+        pending_tests = "0"
+    try:
+        low_stock = str(_low_stock_count(5))
+    except Exception:
+        low_stock = "0"
 
-top_kpi_markup = f'''
-<div class="top-kpi-row" style="padding:6px 0 12px;">
-  <div style="min-width:220px; padding-right:8px;">
-    <div class="rmp-card kpi-card">
-      <div class="kpi-title">👥 Patients</div>
-      <div class="kpi-value">{patients_count}</div>
+    top_kpi_markup = f'''
+    <div class="top-kpi-row" style="padding:6px 0 12px;">
+      <div style="min-width:220px; padding-right:8px;">
+        <div class="rmp-card kpi-card">
+          <div class="kpi-title">👥 Patients</div>
+          <div class="kpi-value">{patients_count}</div>
+        </div>
+      </div>
+      <div style="min-width:220px; padding-right:8px;">
+        <div class="rmp-card kpi-card">
+          <div class="kpi-title">📝 Today's Visits</div>
+          <div class="kpi-value">{visits_count}</div>
+        </div>
+      </div>
+      <div style="min-width:220px; padding-right:8px;">
+        <div class="rmp-card kpi-card">
+          <div class="kpi-title">🧪 Pending Tests</div>
+          <div class="kpi-value">{pending_tests}</div>
+        </div>
+      </div>
+      <div style="min-width:220px; padding-right:8px;">
+        <div class="rmp-card kpi-card">
+          <div class="kpi-title">📦 Low Stock (≤5)</div>
+          <div class="kpi-value">{low_stock}</div>
+        </div>
+      </div>
     </div>
-  </div>
-  <div style="min-width:220px; padding-right:8px;">
-    <div class="rmp-card kpi-card">
-      <div class="kpi-title">📝 Today's Visits</div>
-      <div class="kpi-value">{visits_count}</div>
-    </div>
-  </div>
-  <div style="min-width:220px; padding-right:8px;">
-    <div class="rmp-card kpi-card">
-      <div class="kpi-title">🧪 Pending Tests</div>
-      <div class="kpi-value">{pending_tests}</div>
-    </div>
-  </div>
-  <div style="min-width:220px; padding-right:8px;">
-    <div class="rmp-card kpi-card">
-      <div class="kpi-title">📦 Low Stock (≤5)</div>
-      <div class="kpi-value">{low_stock}</div>
-    </div>
-  </div>
-</div>
-'''
-st.markdown(top_kpi_markup, unsafe_allow_html=True)
+    '''
+    st.markdown(top_kpi_markup, unsafe_allow_html=True)
 
-st.write("")
+    st.write("")
 
     if "rmp_section" not in st.session_state:
         st.session_state["rmp_section"] = "Dashboard"
