@@ -962,45 +962,45 @@ def render_health_agent_dashboard(user):
 
         
         # --- BIG CARDS ROW replaced by assistant: horizontal scroller ---
-try:
-    patients_count = str(_count_rows("patients"))
-except Exception:
-    patients_count = "0"
-try:
-    appointments_count = str(_count_rows("appointments"))
-except Exception:
-    appointments_count = "0"
-try:
-    vitals_count = str(_count_rows("vitals"))
-except Exception:
-    vitals_count = "0"
+    try:
+        patients_count = str(_count_rows("patients"))
+    except Exception:
+        patients_count = "0"
+    try:
+        appointments_count = str(_count_rows("appointments"))
+    except Exception:
+        appointments_count = "0"
+    try:
+        vitals_count = str(_count_rows("vitals"))
+    except Exception:
+        vitals_count = "0"
 
-big_cards_markup = f'''
-<div class="rmp-tile-grid" style="overflow-x:auto; -webkit-overflow-scrolling:touch; padding:12px 6px;">
-  <div class="rmp-tile-wrap">
-    <div class="rmp-circle-card card-inner">
-      <div style="font-size:34px">👥</div>
-      <div style="font-weight:700;margin-top:12px">Patients</div>
-      <div style="font-size:22px;margin-top:8px">{patients_count}</div>
+    big_cards_markup = f'''
+    <div class="rmp-tile-grid" style="overflow-x:auto; -webkit-overflow-scrolling:touch; padding:12px 6px;">
+      <div class="rmp-tile-wrap">
+        <div class="rmp-circle-card card-inner">
+          <div style="font-size:34px">👥</div>
+          <div style="font-weight:700;margin-top:12px">Patients</div>
+          <div style="font-size:22px;margin-top:8px">{patients_count}</div>
+        </div>
+      </div>
+      <div class="rmp-tile-wrap">
+        <div class="rmp-circle-card card-inner">
+          <div style="font-size:34px">📅</div>
+          <div style="font-weight:700;margin-top:12px">Appointments</div>
+          <div style="font-size:22px;margin-top:8px">{appointments_count}</div>
+        </div>
+      </div>
+      <div class="rmp-tile-wrap">
+        <div class="rmp-circle-card card-inner">
+          <div style="font-size:34px">🩺</div>
+          <div style="font-weight:700;margin-top:12px">Record Vitals</div>
+          <div style="font-size:22px;margin-top:8px">{vitals_count}</div>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="rmp-tile-wrap">
-    <div class="rmp-circle-card card-inner">
-      <div style="font-size:34px">📅</div>
-      <div style="font-weight:700;margin-top:12px">Appointments</div>
-      <div style="font-size:22px;margin-top:8px">{appointments_count}</div>
-    </div>
-  </div>
-  <div class="rmp-tile-wrap">
-    <div class="rmp-circle-card card-inner">
-      <div style="font-size:34px">🩺</div>
-      <div style="font-weight:700;margin-top:12px">Record Vitals</div>
-      <div style="font-size:22px;margin-top:8px">{vitals_count}</div>
-    </div>
-  </div>
-</div>
-'''
-st.markdown(big_cards_markup, unsafe_allow_html=True)
+    '''
+    st.markdown(big_cards_markup, unsafe_allow_html=True)
 
     # spacer to keep consistent look
     st.markdown('<div style="height:18px"></div>', unsafe_allow_html=True)
