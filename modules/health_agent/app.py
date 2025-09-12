@@ -1008,11 +1008,6 @@ def render_health_agent_dashboard(user):
     st.markdown('</div>', unsafe_allow_html=True)
     return
 
-        st.markdown('<div style=\"height:18px\"></div>', unsafe_allow_html=True)
-        _bottom_nav()
-        st.markdown('</div>', unsafe_allow_html=True)
-        return
-
     # ---------- Detail pages ----------
     if st.button("← Back to dashboard", key="back_to_dash"):
         st.session_state["rmp_section"] = "Dashboard"; st.rerun()
